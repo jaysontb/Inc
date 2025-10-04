@@ -1,88 +1,70 @@
-#ifndef __GRIPPER_H__
-#define __GRIPPER_H__
+/**
+  ******************************************************************************
+  * @file    gripper.h
+  * @brief   机械爪控制模块头文件
+  * @details 包含云台旋转、爪子开合、升降控制功能
+  *          本模块用于比赛中的物料抓取、测试、装配等任务
+  ******************************************************************************
+  */
+
+#ifndef __GRIPPER_H
+#define __GRIPPER_H
 
 #include "main.h"
-#include <stdint.h>
 #include <stdbool.h>
 
-// 舵机控制参数
-#define SERVO_FREQUENCY_HZ      50      // 舵机PWM频率50Hz
-#define SERVO_PERIOD_US         20000   // 周期20ms
-#define SERVO_MIN_PULSE_US      500     // 最小脉宽0.5ms
-#define SERVO_MAX_PULSE_US      2500    // 最大脉宽2.5ms
+/* ==================== 硬件配置参数 ==================== */
 
-// 机械爪位置定义 (PWM占空比，0-1000对应0.5ms-2.5ms)
-typedef enum {
-    // 伸缩舵机位置
-    EXTEND_RETRACT      = 100,  // 完全收回位置（安全位置）
-    EXTEND_HALF         = 300,  // 半伸出位置
-    EXTEND_GRAB         = 500,  // 抓取位置
-    EXTEND_PLACE        = 600,  // 放置位置
-    EXTEND_STACK        = 700,  // 码垛位置
-    
-    // 抓取舵机位置
-    GRIP_OPEN           = 150,  // 完全张开
-    GRIP_LIGHT          = 350,  // 轻抓（适合轻物料）
-    GRIP_NORMAL         = 500,  // 正常抓取
-    GRIP_FIRM           = 650,  // 牢固抓取
-    GRIP_STACK          = 400   // 码垛专用抓取力度
-} GripperPosition_t;
+// 升降电机(丝杆步进电机)配置
+#define GRIPPER_LIFT_MOTOR_ADDR     6       // 升降电机地址
+#define GRIPPER_CLK_PER_MM          1143    // 脉冲数/mm (实测: 16000clk=14mm)
+#define GRIPPER_DEFAULT_SPEED       80      // 默认速度 (RPM)
+#define GRIPPER_DEFAULT_ACC         100     // 默认加速度
+#define GRIPPER_MAX_HEIGHT          22.0f   // 最大升降高度 (mm) - 离地20.2cm
+#define GRIPPER_MIN_HEIGHT          0.0f    // 最小升降高度 (mm) - 离地18cm(零点)
 
-// 机械爪状态
-typedef enum {
-    GRIPPER_IDLE = 0,           // 空闲状态
-    GRIPPER_EXTENDING,          // 正在伸出
-    GRIPPER_RETRACTING,         // 正在收回
-    GRIPPER_GRIPPING,           // 正在抓取
-    GRIPPER_RELEASING,          // 正在松开
-    GRIPPER_ERROR               // 错误状态
-} GripperState_t;
+// 云台旋转电机配置 (后续添加)
+// #define GRIPPER_PAN_MOTOR_ADDR      7       // 云台电机地址 (待定)
 
-// 物料类型（影响抓取策略）
-typedef enum {
-    MATERIAL_UNKNOWN = 0,       // 未知物料
-    MATERIAL_A_LIGHT,           // 物料A（轻型）
-    MATERIAL_A_HEAVY,           // 物料A（重型）
-    MATERIAL_B_LIGHT,           // 物料B（轻型）
-    MATERIAL_B_HEAVY,           // 物料B（重型）
-    MATERIAL_ASSEMBLY           // 装配体
-} MaterialType_t;
+// 爪子开合舵机配置 (后续添加)
+// #define GRIPPER_CLAW_SERVO_CHANNEL  1       // 舵机通道 (待定)
 
-// 机械爪控制结构体
-typedef struct {
-    uint16_t extend_position;   // 当前伸缩位置
-    uint16_t grip_position;     // 当前抓取位置
-    GripperState_t state;       // 当前状态
-    MaterialType_t material;    // 当前物料类型
-    bool has_material;          // 是否抓有物料
-    uint32_t last_action_time; // 上次动作时间
-} GripperControl_t;
+/* ==================== 预设位置参数 ==================== */
 
-// 机械爪初始化
-void Gripper_Init(void);
+// 根据比赛场地实测调整以下高度值
+// 注意: 0mm = 离地18cm, 22mm = 离地20.2cm
+#define HEIGHT_HOME                 0.0f    // 归零位置 (离地18cm)
+#define HEIGHT_PICKUP_LOWER         0.0f    // 下层物料台抓取高度 (离地18cm)
+#define HEIGHT_PICKUP_UPPER         15.0f   // 上层物料台抓取高度 (离地19.5cm)
+#define HEIGHT_TEST_PLATFORM        8.0f    // 测试台放置高度 (离地18.8cm)
+#define HEIGHT_ASSEMBLY_L1          5.0f    // 装配台第一层高度 (离地18.5cm)
+#define HEIGHT_ASSEMBLY_L2          12.0f   // 装配台第二层高度 (离地19.2cm)
+#define HEIGHT_TRANSPORT            22.0f   // 搬运过程中的安全高度 (最高点,离地20.2cm)
 
-// 基础控制函数
-bool Gripper_SetExtendPosition(uint16_t position, uint16_t timeout_ms);
-bool Gripper_SetGripPosition(uint16_t position, uint16_t timeout_ms);
+/* ==================== 公开函数声明 ==================== */
 
-// 复合动作函数
-bool Gripper_GrabMaterial(MaterialType_t material_type);
-bool Gripper_PlaceMaterial(void);
-bool Gripper_PlaceMaterialOnPlatform(void);
-bool Gripper_PlaceMaterialInSlot(void);
-bool Gripper_StackMaterial(void);
-bool Gripper_RetractToSafe(void);
+/**
+ * @brief 控制机械爪升降到指定高度
+ * @param height_mm 目标高度 (mm), 范围[0, 22]
+ * @note 自动使用默认速度80RPM, 会阻塞等待运动完成
+ */
+void Gripper_Lift(float height_mm);
 
-// 状态查询函数
-GripperState_t Gripper_GetState(void);
-bool Gripper_HasMaterial(void);
-bool Gripper_IsReady(void);
+/**
+ * @brief 获取当前机械爪高度
+ * @retval 当前高度 (mm)
+ */
+float Gripper_Get_Height(void);
 
-// 精确控制函数
-bool Gripper_AdjustPosition(int16_t extend_delta, int16_t grip_delta);
-bool Gripper_SlowPlace(void);  // 缓慢精确放置
+// ========== 云台旋转控制 (后续实现) ==========
 
-// 紧急停止
-void Gripper_EmergencyStop(void);
+// void Gripper_Pan_Rotate(float angle_deg);
+// void Gripper_Pan_Home(void);
 
-#endif // __GRIPPER_H__
+// ========== 爪子开合控制 (后续实现) ==========
+
+// void Gripper_Claw_Open(void);
+// void Gripper_Claw_Close(void);
+// void Gripper_Claw_Set_Width(float width_mm);
+
+#endif /* __GRIPPER_H */
