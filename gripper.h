@@ -20,18 +20,20 @@
 #define GRIPPER_CLK_PER_MM          1143    // 脉冲数/mm (实测: 16000clk=14mm)
 #define GRIPPER_DEFAULT_SPEED       80      // 默认速度 (RPM)
 #define GRIPPER_DEFAULT_ACC         100     // 默认加速度
-#define GRIPPER_MAX_HEIGHT          22.0f   // 最大升降高度 (mm) - 离地20.2cm
+#define GRIPPER_MAX_HEIGHT          28.0f   // 最大升降高度 (mm) - 离地20.8cm
 #define GRIPPER_MIN_HEIGHT          0.0f    // 最小升降高度 (mm) - 离地18cm(零点)
 
-// 云台旋转电机配置 (后续添加)
-// #define GRIPPER_PAN_MOTOR_ADDR      7       // 云台电机地址 (待定)
+// 云台舵机配置 (TIM1_CH1)
+#define GRIPPER_PAN_MIN_ANGLE       0.0f    // 云台最小角度(抓取位置)
+#define GRIPPER_PAN_MAX_ANGLE       270.0f  // 云台最大角度
 
-// 爪子开合舵机配置 (后续添加)
-// #define GRIPPER_CLAW_SERVO_CHANNEL  1       // 舵机通道 (待定)
+// 爪子舵机配置 (TIM1_CH2)
+#define GRIPPER_CLAW_MIN_ANGLE      5.0f    // 爪子抓紧角度
+#define GRIPPER_CLAW_MAX_ANGLE      45.0f   // 爪子松开角度
 
 /* ==================== 预设位置参数 ==================== */
 
-// 根据比赛场地实测调整以下高度值
+// 升降高度预设值 (根据比赛场地实测调整)
 // 注意: 0mm = 离地18cm, 22mm = 离地20.2cm
 #define HEIGHT_HOME                 0.0f    // 归零位置 (离地18cm)
 #define HEIGHT_PICKUP_LOWER         0.0f    // 下层物料台抓取高度 (离地18cm)
@@ -39,7 +41,13 @@
 #define HEIGHT_TEST_PLATFORM        8.0f    // 测试台放置高度 (离地18.8cm)
 #define HEIGHT_ASSEMBLY_L1          5.0f    // 装配台第一层高度 (离地18.5cm)
 #define HEIGHT_ASSEMBLY_L2          12.0f   // 装配台第二层高度 (离地19.2cm)
-#define HEIGHT_TRANSPORT            22.0f   // 搬运过程中的安全高度 (最高点,离地20.2cm)
+#define HEIGHT_TRANSPORT            28.0f   // 搬运过程中的安全高度 (最高点,离地20.8cm)
+
+// 云台角度预设值 (根据实测数据)
+#define PAN_ANGLE_GRAB              0.0f    // 抓取位置 (机械臂前方)
+#define PAN_ANGLE_PLATE1            182.0f  // 第一个物料盘位置
+#define PAN_ANGLE_PLATE2            208.0f  // 第二个物料盘位置
+#define PAN_ANGLE_PLATE3            228.0f  // 第三个物料盘位置
 
 /* ==================== 公开函数声明 ==================== */
 
@@ -56,15 +64,23 @@ void Gripper_Lift(float height_mm);
  */
 float Gripper_Get_Height(void);
 
-// ========== 云台旋转控制 (后续实现) ==========
+/**
+ * @brief 控制云台旋转到指定角度
+ * @param angle_deg 目标角度 (度), 范围[0, 270]
+ * @note 使用舵机控制,无需等待,立即返回
+ */
+void Gripper_Pan_Rotate(float angle_deg);
 
-// void Gripper_Pan_Rotate(float angle_deg);
-// void Gripper_Pan_Home(void);
+/**
+ * @brief 控制爪子张开
+ * @note 张开到最大角度45°,用于释放物料
+ */
+void Gripper_Claw_Open(void);
 
-// ========== 爪子开合控制 (后续实现) ==========
-
-// void Gripper_Claw_Open(void);
-// void Gripper_Claw_Close(void);
-// void Gripper_Claw_Set_Width(float width_mm);
+/**
+ * @brief 控制爪子闭合
+ * @note 闭合到最小角度9°,用于抓取物料
+ */
+void Gripper_Claw_Close(void);
 
 #endif /* __GRIPPER_H */

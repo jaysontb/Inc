@@ -48,6 +48,9 @@ extern __IO bool rxFrameFlag;
 extern __IO uint8_t rxCmd[CMD_LEN];
 extern __IO uint8_t rxCount;
 
+// 电机到位标志 (UART空闲中断优化方案)
+extern volatile bool motor_arrived_flag;
+
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);
