@@ -87,5 +87,6 @@ void Visual_Clear_RxFlag(void);           // 清除接收标志
 
 // 辅助函数
 uint8_t Visual_Verify_Frame(uint8_t *data, uint8_t expected_tail_pos);
+uint8_t Visual_Wait_Response(uint32_t timeout_ms);
 
 #endif /* __VISUAL_COMM_H */
