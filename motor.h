@@ -68,13 +68,32 @@ void Motor_Move_Forward_WithYawHold(float distance_mm, float target_yaw_deg,
 
 /**
  * @brief 带航向保持的平移运动 (Level 2)
- * @param distance_mm 移动距离(mm), 正值右移, 负值左移
+ * @param distance_mm 移动距离(mm), 负值右移, 正值左移
  * @param target_yaw_deg 目标航向角(度), 通常是起始yaw角
  * @param tolerance_deg 允许偏差(度), 建议±2°
  * @param speed_rpm 速度(RPM), 0表示使用默认值
  * @note 自动分段移动并修正航向偏差,防止平移时车体旋转
  */
 void Motor_Move_Lateral_WithYawHold(float distance_mm, float target_yaw_deg,
-                                     float tolerance_deg, uint16_t speed_rpm);
+                                     float tolerance_deg, uint16_t speed_rpm,float segment) ;
+
+/**
+ * @brief 基于DMP反馈的精确90°旋转
+ * @param clockwise 1=顺时针, 0=逆时针
+ * @param speed_rpm 速度(RPM), 0表示使用默认值
+ * @return 0=成功, 1=MPU读取失败
+ * @note 使用DMP实时姿态解算,闭环控制到达±2°精度
+ */
+uint8_t Motor_Rotate_90_DMP(uint8_t clockwise, uint16_t speed_rpm);
+
+/**
+ * @brief 原地航向矫正(修正到目标航向)
+ * @param target_yaw_deg 目标航向角(度)
+ * @param tolerance_deg 允许偏差(度), 建议±2°
+ * @param speed_rpm 速度(RPM), 0表示使用默认值
+ * @return 0=成功(无需矫正或矫正完成), 1=MPU读取失败
+ * @note 读取当前航向,如果偏差超过tolerance则原地旋转修正
+ */
+uint8_t Motor_Correct_Yaw(float target_yaw_deg, float tolerance_deg, uint16_t speed_rpm);
 
 #endif /* __MOTOR_H__ */

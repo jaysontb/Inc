@@ -52,6 +52,10 @@ void OLED_ShowNum(uint8_t Line, uint8_t Column, uint32_t Number, uint8_t Length)
 void OLED_ShowSignedNum(uint8_t Line, uint8_t Column, int32_t Number, uint8_t Length);
 void OLED_ShowHexNum(uint8_t Line, uint8_t Column, uint32_t Number, uint8_t Length);
 void OLED_ShowBinNum(uint8_t Line, uint8_t Column, uint32_t Number, uint8_t Length);
+void OLED_ShowChinese24x24(uint8_t x, uint8_t y, uint16_t gb_code);
+void OLED_ShowChinese24x24String(uint8_t x, uint8_t y, const char *text);
+void OLED_ShowChinese16x16(uint8_t x, uint8_t y, uint16_t gb_code);
+void OLED_ShowChinese16x16String(uint8_t x, uint8_t y, const char *text);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

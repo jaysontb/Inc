@@ -61,6 +61,13 @@ typedef enum
     COLOR_BLUE = 0x03    // 蓝色
 } ColorTarget_t;
 
+/* 视觉对位目标类型定义 */
+typedef enum {
+    TARGET_MATERIAL_BLOCK = 0,   // 物块 (物料台上的红/绿/蓝物块)
+    TARGET_TEST_PLATFORM = 1,    // 凸台 (测试区凸台)
+    TARGET_ASSEMBLY_SLOT = 2     // 凹槽 (装配区凹槽)
+} TargetType_t;
+
 /* 全局变量声明 */
 extern VisualRxData_t VIS_RX;
 extern uint8_t color_task[6];
@@ -84,6 +91,7 @@ void Visual_Data_Unpack(uint8_t *lubancat_data);
 void Visual_UART_RxCallback(void);        // 串口接收回调
 uint8_t* Visual_Get_RxBuffer(void);       // 获取接收缓冲区
 void Visual_Clear_RxFlag(void);           // 清除接收标志
+uint8_t Visual_GetLastResponse(uint8_t *dest, uint8_t max_len); // 获取最近一次响应
 
 // 辅助函数
 uint8_t Visual_Verify_Frame(uint8_t *data, uint8_t expected_tail_pos);

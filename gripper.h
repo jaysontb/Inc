@@ -18,7 +18,7 @@
 // 升降电机(丝杆步进电机)配置
 #define GRIPPER_LIFT_MOTOR_ADDR     6       // 升降电机地址
 #define GRIPPER_CLK_PER_MM          1143    // 脉冲数/mm (实测: 16000clk=14mm)
-#define GRIPPER_DEFAULT_SPEED       80      // 默认速度 (RPM)
+#define GRIPPER_DEFAULT_SPEED       150      // 默认速度 (RPM)
 #define GRIPPER_DEFAULT_ACC         100     // 默认加速度
 #define GRIPPER_MAX_HEIGHT          28.0f   // 最大升降高度 (mm) - 离地20.8cm
 #define GRIPPER_MIN_HEIGHT          0.0f    // 最小升降高度 (mm) - 离地18cm(零点)
@@ -28,7 +28,7 @@
 #define GRIPPER_PAN_MAX_ANGLE       270.0f  // 云台最大角度
 
 // 爪子舵机配置 (TIM1_CH2)
-#define GRIPPER_CLAW_MIN_ANGLE      5.0f    // 爪子抓紧角度
+#define GRIPPER_CLAW_MIN_ANGLE      3.0f    // 爪子抓紧角度
 #define GRIPPER_CLAW_MAX_ANGLE      45.0f   // 爪子松开角度
 
 /* ==================== 预设位置参数 ==================== */
@@ -39,15 +39,15 @@
 #define HEIGHT_PICKUP_LOWER         0.0f    // 下层物料台抓取高度 (离地18cm)
 #define HEIGHT_PICKUP_UPPER         15.0f   // 上层物料台抓取高度 (离地19.5cm)
 #define HEIGHT_TEST_PLATFORM        8.0f    // 测试台放置高度 (离地18.8cm)
-#define HEIGHT_ASSEMBLY_L1          5.0f    // 装配台第一层高度 (离地18.5cm)
+#define HEIGHT_ASSEMBLY_L1          3.0f    // 装配台第一层高度 (离地18.3cm)
 #define HEIGHT_ASSEMBLY_L2          12.0f   // 装配台第二层高度 (离地19.2cm)
 #define HEIGHT_TRANSPORT            28.0f   // 搬运过程中的安全高度 (最高点,离地20.8cm)
 
 // 云台角度预设值 (根据实测数据)
 #define PAN_ANGLE_GRAB              0.0f    // 抓取位置 (机械臂前方)
-#define PAN_ANGLE_PLATE1            182.0f  // 第一个物料盘位置
-#define PAN_ANGLE_PLATE2            208.0f  // 第二个物料盘位置
-#define PAN_ANGLE_PLATE3            228.0f  // 第三个物料盘位置
+#define PAN_ANGLE_PLATE1            184.0f  // 第一个物料盘位置
+#define PAN_ANGLE_PLATE2            204.0f  // 第二个物料盘位置
+#define PAN_ANGLE_PLATE3            224.0f  // 第三个物料盘位置
 
 /* ==================== 公开函数声明 ==================== */
 
@@ -82,5 +82,24 @@ void Gripper_Claw_Open(void);
  * @note 闭合到最小角度9°,用于抓取物料
  */
 void Gripper_Claw_Close(void);
+
+/**
+ * @brief 抓取并放置物块到指定物料盘
+ * @param plate_number 物料盘编号 (1/2/3)
+ * @note 第3次调用时不会执行回原位操作
+ */
+void Gripper_PickAndPlace(int plate_number);
+
+/**
+ * @brief 重置抓取计数器
+ * @note 在新的抓取流程开始前调用,将计数器重置为0
+ */
+void Gripper_Reset_PickupCounter(void);
+
+/**
+ * @brief 获取当前抓取次数
+ * @return 当前已执行的抓取次数
+ */
+uint8_t Gripper_Get_PickupCounter(void);
 
 #endif /* __GRIPPER_H */
